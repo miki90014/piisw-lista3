@@ -2,7 +2,10 @@ package com.example.orderservice.service;
 
 import com.example.orderservice.model.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +18,7 @@ public class OrderService {
     private final DeliveryRepository deliveryRepository;
     private final ProductRepository productRepository;
     private final ItemsRepository itemsRepository;
+    private final RestTemplate restTemplate;
 
     public List<OrdersDTO> getAll() {
         List<OrdersDTO> orders = new ArrayList<>();
@@ -64,7 +68,10 @@ public class OrderService {
             itemsRepository.save(ordersItem);
             items.add(ordersItem);
         }
-        orderRepository.save(order);
+        String orderHistoryUrl = "http://localhost:8081/orderHistory/" + id;
+        System.out.println(orderHistoryUrl);
+        ResponseEntity<String> response = restTemplate.postForEntity(orderHistoryUrl, ordersDTO, String.class);
+        System.out.println("Response status code: " + response.getStatusCodeValue());
     }
 
     public OrdersDTO getById(Long id) {
@@ -98,6 +105,10 @@ public class OrderService {
         Delivery delivery = order.get().getDelivery();
         delivery.setDeliveryStatus(status);
         deliveryRepository.save(delivery);
+        String orderHistoryUrl = "http://localhost:8081/orderHistory/" + status.toString() + "/" + id;
+        System.out.println(orderHistoryUrl);
+        ResponseEntity<String> response = restTemplate.getForEntity(orderHistoryUrl, String.class);
+        System.out.println("Response status code: " + response.getStatusCodeValue());
         return getById(id);
     }
 
