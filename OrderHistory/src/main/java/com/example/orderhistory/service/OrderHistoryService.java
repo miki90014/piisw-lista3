@@ -19,7 +19,7 @@ public class OrderHistoryService {
     }
 
     public OrderHistory getById(Long id){
-        return orderHistoryRepository.getById(id);
+        return orderHistoryRepository.findById(id).get();
     }
 
     public void addOrder(OrdersDTO ordersDTO, Long id) {
